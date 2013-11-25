@@ -32,7 +32,7 @@ class URLUtils {
         !(url.indexOf('//') >= 0)
     }
 
-    static Boolean isExternalURL(url){
+    static Boolean isExternalURL(def url){
         return url ==~ externalURLPattern
     }
 }
