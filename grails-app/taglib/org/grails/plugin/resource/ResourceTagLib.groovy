@@ -579,31 +579,36 @@ class ResourceTagLib {
                 session.removeAttribute('grails-resources.debug-timestamp')
                 request.'grails-resources.debug-timestamp-refreshed' = true
             }
-            
-            def timestamp = session['grails-resources.debug-timestamp']
-            if (!timestamp) {
+
+            def timestamp = null;
+            try {
+                timestamp = session['grails-resources.debug-timestamp']
+                if (!timestamp) {
+                    timestamp = System.currentTimeMillis()
+                    session['grails-resources.debug-timestamp'] = timestamp
+                }
+            } catch (IllegalStateException e) {
                 timestamp = System.currentTimeMillis()
-                session['grails-resources.debug-timestamp'] = timestamp
             }
 
             uri += (uri.indexOf('?') >= 0) ? "&_debugResources=y&n=$timestamp" : "?_debugResources=y&n=$timestamp"
-            return [uri:uri, debug:true]
-        } 
-        
+            return [uri: uri, debug: true]
+        }
+
         def disposition = attrs.remove('disposition')
 
         if (!abs) {
             uri = forcePrefixedWithSlash(uri)
         }
-        
+
         // If its a bad or empty URI, get out of here. It must at least contain the context path if it is relative
         if (!abs && (uri.size() <= ctxPath.size())) {
-            return [uri:uri]
+            return [uri: uri]
         }
 
         def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
         def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
-        
+
         // Get ResourceMeta or create one if uri is not absolute
         def res = grailsResourceProcessor.getExistingResourceMeta(reluri)
         if (!res && !abs) {
